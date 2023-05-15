@@ -1,23 +1,71 @@
-{# templates/login/index.html.twig #}
-{% extends 'base.html.twig' %}
+<!doctype html>
+<html lang="en">
 
-{# ... #}
+<head>
+    <title>Zahit Rios | Prueba técnica</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/login/css/style.css">
+    <link rel="stylesheet" href="/assets/login/css/login.css">
+</head>
 
-{% block body %}
-    {% if error %}
-        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+<body class="img js-fullheight backgroundLogin">
+    <section class="ftco-section">
+        <div class="container darkOverlay">
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center">                    
+                    <img src='/assets/login/images/logo.svg' width="500px" />                    
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="login-wrap p-0">
+                        <h3 class="mb-4 text-center">Ingresa tus datos</h3>
 
-    <form action="{{ path('app_login') }}" method="post">
-        <label for="username">Email:</label>
-        <input type="text" id="username" name="_username" value="{{ last_username }}">
+                        {% if error %}
+                            <div>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="_password">
+                        <form action="{{ path('app_login') }}" class="signin-form" method="post">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="username" name="_username" placeholder="Usuario" value="{{ last_username }}" />
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="password" class="form-control" name="_password" placeholder="Contraseña" required />
+                                <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                                <button type="submit" class="form-control btn btn-primary submit px-3">Ingresar</button>                                
+                            </div>
+                            <div class="form-group d-md-flex">
+                                <div class="w-50">
+                                    <label class="checkbox-wrap checkbox-primary">
+                                        Recordarme
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="w-50 text-md-right">
+                                    {# <a href="#" style="color: #fff">Forgot Password</a> #}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        {# If you want to control the URL the user is redirected to on success
-        <input type="hidden" name="_target_path" value="/account"> #}
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <button type="submit">login</button>
-    </form>
-{% endblock %}
+    <script src="/assets/login/js/jquery.min.js"></script>
+    <script src="/assets/login/js/popper.js"></script>
+    <script src="/assets/login/js/bootstrap.min.js"></script>
+    <script src="/assets/login/js/main.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+.backgroundLogin{
+    background-image: url(/assets/login/images/bg.jpg); 
+    background-size: cover; 
+    background-position: top left;
+}
+
+.darkOverlay{
+    border-radius: 10px;
+    background-color: #0000004d;
+}
