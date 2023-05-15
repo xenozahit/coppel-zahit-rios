@@ -19,6 +19,10 @@ class Employee
     #[ORM\Column(length: 140)]
     private ?string $lastName = null;
 
+    #[ORM\ManyToOne(inversedBy: 'employees')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Role $role = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,5 +50,21 @@ class Employee
         $this->lastName = $lastName;
 
         return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): self
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    public function __toString(){
+        return $this->firstName.' '.$this->lastName;
     }
 }

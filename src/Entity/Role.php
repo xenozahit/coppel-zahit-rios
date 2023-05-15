@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RoleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
@@ -39,6 +41,14 @@ class Role
 
     #[ORM\Column]
     private ?float $deliveryBond = null;
+
+    #[ORM\OneToMany(mappedBy: 'role', targetEntity: Employee::class, orphanRemoval: true)]
+    private Collection $employees;
+
+    public function __construct()
+    {
+        $this->employees = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -148,5 +158,35 @@ class Role
     public function __toString()
     {
         return $this->name;
+    }
+
+    /**
+     * @return Collection<int, Employee>
+     */
+    public function getEmployees(): Collection
+    {
+        return $this->employees;
+    }
+
+    public function addEmployee(Employee $employee): self
+    {
+        if (!$this->employees->contains($employee)) {
+            $this->employees->add($employee);
+            $employee->setRole($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployee(Employee $employee): self
+    {
+        if ($this->employees->removeElement($employee)) {
+            // set the owning side to null (unless already changed)
+            if ($employee->getRole() === $this) {
+                $employee->setRole(null);
+            }
+        }
+
+        return $this;
     }
 }

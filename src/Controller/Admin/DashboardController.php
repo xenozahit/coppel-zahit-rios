@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Role;
+use App\Entity\Employee;
 use App\Controller\Admin\RoleCrudController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,6 +31,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Inicio', 'fa fa-home');
+        yield MenuItem::linkToCrud('Empleados', 'fas fa-users', Employee::class)->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Roles', 'fas fa-tags', Role::class)->setPermission('ROLE_ADMIN');
         yield MenuItem::section('');
         yield MenuItem::linkToLogout('Cerrar sesión', 'fas fa-sign-out-alt');
