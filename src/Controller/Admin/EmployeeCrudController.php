@@ -23,7 +23,7 @@ class EmployeeCrudController extends AbstractCrudController
         return $crud        
             ->setEntityLabelInSingular('Empleado')
             ->setEntityLabelInPlural('Empleados')
-            ->setSearchFields(['firstName', 'lastName'])
+            ->setSearchFields(['firstName', 'lastName', 'role'])
             ->showEntityActionsInlined()
             ->setPageTitle(
                 "detail",

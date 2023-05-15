@@ -10,6 +10,8 @@ password: test
 ## Seeders o fixtures
 El sistema ya cuenta con ejemplos de usuarios y roles en el sistema que el usuario puede usar para registrar entregas y calcular los salarios mensuales
 
+Los fixtures son cargados en orden gracias a la interfaz DependentFixtureInterface
+
 ## Store procedures vs Subscribers
 
 Con la finalidad de dejar toda la lógica versionada en el repositorio, no utilicé store proceduers y en el proyecto configuré los siguientes subcribers:
