@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EmployeeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
@@ -22,6 +24,14 @@ class Employee
     #[ORM\ManyToOne(inversedBy: 'employees')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Role $role = null;
+
+    #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Record::class, orphanRemoval: true)]
+    private Collection $records;
+
+    public function __construct()
+    {
+        $this->records = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -66,5 +76,35 @@ class Employee
 
     public function __toString(){
         return $this->firstName.' '.$this->lastName;
+    }
+
+    /**
+     * @return Collection<int, Record>
+     */
+    public function getRecords(): Collection
+    {
+        return $this->records;
+    }
+
+    public function addRecord(Record $record): self
+    {
+        if (!$this->records->contains($record)) {
+            $this->records->add($record);
+            $record->setEmployee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecord(Record $record): self
+    {
+        if ($this->records->removeElement($record)) {
+            // set the owning side to null (unless already changed)
+            if ($record->getEmployee() === $this) {
+                $record->setEmployee(null);
+            }
+        }
+
+        return $this;
     }
 }
