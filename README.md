@@ -6,7 +6,7 @@ Prueba técnica para Coppel
 
 Lenguaje: PHP 8.1
 
-Framework: Symfony
+Framework: Symfony 6.2
 
 Bundles: 
 - Doctrine -> ORM de la base de datos
