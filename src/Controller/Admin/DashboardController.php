@@ -6,6 +6,7 @@ use App\Entity\Role;
 use App\Entity\Record;
 use App\Entity\Employee;
 use App\Controller\Admin\RoleCrudController;
+use App\Entity\MonthlyPayment;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -19,7 +20,7 @@ class DashboardController extends AbstractDashboardController
     public function index(): Response
     {
         $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
-        return $this->redirect($adminUrlGenerator->setController(RoleCrudController::class)->generateUrl());
+        return $this->redirect($adminUrlGenerator->setController(RecordCrudController::class)->generateUrl());
     }
 
     public function configureDashboard(): Dashboard
@@ -32,6 +33,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Inicio', 'fa fa-home');
+        yield MenuItem::linkToCrud('Salarios mensuales', 'fas fa-hand-holding-usd', MonthlyPayment::class)->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Registro de entregas', 'fas fa-truck', Record::class)->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Empleados', 'fas fa-users', Employee::class)->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToCrud('Roles', 'fas fa-tags', Role::class)->setPermission('ROLE_ADMIN');
