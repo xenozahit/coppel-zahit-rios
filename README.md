@@ -46,6 +46,14 @@ El sistema ya cuenta con ejemplos de usuarios y roles en el sistema que el usuar
     - Tipo de autenticación
     - Password hasher
 
+## IDE utilizado
+
+- Visual Studio Code
+
+## Herramientas utilizadas durante el desarrollo
+
+- XDebug
+
 ## Sobre el servidor
 
 Configuré una instancia EC2 de AWS, con sitema operativo Ubuntu, NGINX, UFW (firewall)
