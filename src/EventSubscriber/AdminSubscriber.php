@@ -9,6 +9,7 @@ use App\Controller\MonthlyPaymentUpdate;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MonthlyPaymentRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
@@ -36,7 +37,16 @@ class AdminSubscriber implements EventSubscriberInterface
             BeforeEntityPersistedEvent::class => ['beforPersistEntity'],
             BeforeEntityUpdatedEvent::class => ['beforeUpdateEntity'],
             AfterEntityPersistedEvent::class => ['afterEntityPersistedEvent'],
+            AfterEntityUpdatedEvent::class => ['afterEntityUpdatedEvent'],
         ];
+    }
+
+    public function afterEntityUpdatedEvent(AfterEntityUpdatedEvent $event)
+    {
+        $entity = $event->getEntityInstance();
+
+        if ($entity instanceof Record)
+            $this->recordActions($entity);
     }
 
     public function afterEntityPersistedEvent(AfterEntityPersistedEvent $event)

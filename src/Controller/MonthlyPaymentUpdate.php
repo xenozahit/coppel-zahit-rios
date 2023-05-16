@@ -43,8 +43,8 @@ class MonthlyPaymentUpdate
         }
         $deliveryBondMoney = self::BOND_PER_DELIVERY * $deliveryBondQuantity; //calc of deliveries bond in money
 
-        $hourlyBondQuanity = $role->getDeliveryBond() > 0 ? Role::WEEKS_PER_MONTH * $role->getWorkDayDuration() * $role->getWorkDaysPerWeek()  : 0; //calc of hours bond quantity
-        $hourlyBondMoney = $hourlyBondQuanity > 0 ? $hourlyBondQuanity * $role->getDeliveryBond() : 0; //calc of hours bond money
+        $hourlyBondQuanity = $role->getHourlyBond() > 0 ? Role::WEEKS_PER_MONTH * $role->getWorkDayDuration() * $role->getWorkDaysPerWeek()  : 0; //calc of hours bond quantity
+        $hourlyBondMoney = $hourlyBondQuanity > 0 ? $hourlyBondQuanity * $role->getHourlyBond() : 0; //calc of hours bond money
         
         $monthlySalary = $role->getMonthlyBaseSalary() + $deliveryBondMoney + $hourlyBondMoney; //calc of total monthly salary 
 
