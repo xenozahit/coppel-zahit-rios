@@ -2,12 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\MonthlyPaymentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MonthlyPaymentRepository;
 
 #[ORM\Entity(repositoryClass: MonthlyPaymentRepository::class)]
 class MonthlyPayment
 {
+    const BOND_PER_DELIVERY = 5;
+    const HIGHER_ISR_TAX = 12;
+    const LOWER_ISR_TAX = 9;
+    const MONTHLY_SALARY_LIMIT = 10000;
+    const FOOD_ALLOWANCE_PERCENTAGE = 4;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -248,5 +254,50 @@ class MonthlyPayment
         $this->totalBeforeTaxes = $totalBeforeTaxes;
 
         return $this;
+    }
+
+    public function calculatePayment(array $records)
+    {
+        $role = $this->getEmployee()->getRole();
+        $deliveryBondQuantity = 0;
+        $deliveryBondMoney = 0;
+        $hourlyBondQuanity = 0;
+        $hourlyBondMoney = 0;
+        $monthlySalary = 0;
+        $isrTaxRetentionPercentage = 0;
+        $isrTaxRetentionMoney = 0;
+        $foodAllowancePercentage = 0;
+        $foodAllowanceMoney = 0;   
+        
+        foreach($records as $monthlyRecord){ //calc of deliveries quantity
+            $deliveryBondQuantity += $monthlyRecord->getQuantity();
+        }
+        $deliveryBondMoney = self::BOND_PER_DELIVERY * $deliveryBondQuantity; //calc of deliveries bond in money
+
+        $hourlyBondQuanity = $role->getHourlyBond() > 0 ? Role::WEEKS_PER_MONTH * $role->getWorkDayDuration() * $role->getWorkDaysPerWeek()  : 0; //calc of hours bond quantity
+        $hourlyBondMoney = $hourlyBondQuanity > 0 ? $hourlyBondQuanity * $role->getHourlyBond() : 0; //calc of hours bond money
+
+        $monthlySalary = $role->getMonthlyBaseSalary() + $deliveryBondMoney + $hourlyBondMoney; //calc of total monthly salary
+        
+        $foodAllowancePercentage = self::FOOD_ALLOWANCE_PERCENTAGE;
+        $foodAllowanceMoney = $monthlySalary * $foodAllowancePercentage / 100; //calc of food allowance money
+
+        $isrTaxRetentionPercentage = $monthlySalary > self::MONTHLY_SALARY_LIMIT ? self::HIGHER_ISR_TAX : self::LOWER_ISR_TAX; //calc of isr tax retention percentage
+        $isrTaxRetentionMoney = $monthlySalary * $isrTaxRetentionPercentage / 100; //calc of isr tax retention money
+
+        $monthlySalaryBeforeTaxes = $monthlySalary;
+        $monthlySalary -= $isrTaxRetentionMoney;
+
+        $this->setBaseSalary($role->getMonthlyBaseSalary())
+            ->setHourlyBondQuanity($hourlyBondQuanity)
+            ->setHourlyBondMoney($hourlyBondMoney)
+            ->setDeliveryBondQuantity($deliveryBondQuantity)
+            ->setDeliveryBondMoney($deliveryBondMoney)
+            ->setIsrTaxRetentionPercentage($isrTaxRetentionPercentage)
+            ->setIsrTaxRetentionMoney($isrTaxRetentionMoney)
+            ->setFoodAllowancePercentage($foodAllowancePercentage)
+            ->setFoodAllowanceMoney($foodAllowanceMoney)
+            ->setTotalBeforeTaxes($monthlySalaryBeforeTaxes)
+            ->setTotalPayment($monthlySalary);        
     }
 }

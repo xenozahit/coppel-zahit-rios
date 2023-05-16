@@ -9,12 +9,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class RecordCrudController extends AbstractCrudController
 {
+
     public static function getEntityFqcn(): string
     {
         return Record::class;
@@ -56,10 +59,30 @@ class RecordCrudController extends AbstractCrudController
         ];
     }
 
-    public function configureFilters(Filters $filters): Filters{
+    public function configureFilters(Filters $filters): Filters
+    {
         return $filters
             ->add('date')
             ->add('quantity')
             ->add('employee');
+    }
+
+    protected function getRedirectResponseAfterSave(AdminContext $context, string $action): RedirectResponse
+    {
+        $record = $context->getEntity()->getInstance();
+        $month = date_format($record->getDate(), 'n');
+        $year = date_format($record->getDate(), 'Y');
+        $employee = $record->getEmployee()->getId();
+        $url = $this->container->get('router')->generate(
+                'calculatePayment',
+                array(
+                    'month' => $month,
+                    'year' => $year,
+                    'employee' =>$employee
+                )
+            );
+
+        return $this->redirect($url);
+        
     }
 }

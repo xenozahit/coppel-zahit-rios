@@ -5,7 +5,6 @@ namespace App\Controller\Admin;
 use App\Entity\Role;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -15,7 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\PercentField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class RoleCrudController extends AbstractCrudController
-{
+{   
     public static function getEntityFqcn(): string
     {
         return Role::class;
@@ -107,5 +106,5 @@ class RoleCrudController extends AbstractCrudController
             ->add('foodAllowancePercentage')            
             ->add('workDayDuration')
             ->add('workDaysPerWeek');
-    }
+    }  
 }
