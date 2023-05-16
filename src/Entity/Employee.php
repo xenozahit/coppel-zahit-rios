@@ -28,9 +28,13 @@ class Employee
     #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Record::class, orphanRemoval: true)]
     private Collection $records;
 
+    #[ORM\OneToMany(mappedBy: 'employee', targetEntity: MonthlyPayment::class, orphanRemoval: true)]
+    private Collection $monthlyPayments;
+
     public function __construct()
     {
         $this->records = new ArrayCollection();
+        $this->monthlyPayments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -102,6 +106,36 @@ class Employee
             // set the owning side to null (unless already changed)
             if ($record->getEmployee() === $this) {
                 $record->setEmployee(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MonthlyPayment>
+     */
+    public function getMonthlyPayments(): Collection
+    {
+        return $this->monthlyPayments;
+    }
+
+    public function addMonthlyPayment(MonthlyPayment $monthlyPayment): self
+    {
+        if (!$this->monthlyPayments->contains($monthlyPayment)) {
+            $this->monthlyPayments->add($monthlyPayment);
+            $monthlyPayment->setEmployee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMonthlyPayment(MonthlyPayment $monthlyPayment): self
+    {
+        if ($this->monthlyPayments->removeElement($monthlyPayment)) {
+            // set the owning side to null (unless already changed)
+            if ($monthlyPayment->getEmployee() === $this) {
+                $monthlyPayment->setEmployee(null);
             }
         }
 

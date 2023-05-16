@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Employee;
 use App\Entity\Record;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,6 +39,17 @@ class RecordRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findByDatesAndEmployee(DateTime $startDate, DateTime $endDate, Employee $employee){
+        return $this->createQueryBuilder('r')
+            ->innerJoin('r.employee', 'e', 'WITH', 'e.id = :employee_id')
+            ->where('r.date BETWEEN :startDate AND :endDate')            
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->setParameter('employee_id', $employee->getId())
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

@@ -46,6 +46,10 @@ class MonthlyPayment
     #[ORM\Column]
     private ?float $foodAllowanceMoney = null;
 
+    #[ORM\ManyToOne(inversedBy: 'monthlyPayments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Employee $employee = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -179,6 +183,18 @@ class MonthlyPayment
     public function setFoodAllowanceMoney(float $foodAllowanceMoney): self
     {
         $this->foodAllowanceMoney = $foodAllowanceMoney;
+
+        return $this;
+    }
+
+    public function getEmployee(): ?Employee
+    {
+        return $this->employee;
+    }
+
+    public function setEmployee(?Employee $employee): self
+    {
+        $this->employee = $employee;
 
         return $this;
     }
