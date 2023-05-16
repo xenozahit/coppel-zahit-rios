@@ -11,6 +11,10 @@ user: test
 password: test
 
 
+## Diagrama entidad relación
+
+https://whimsical.com/coppel-VM86nAa74oehXWMqrLLZUU
+
 ## Mejoras al sistema
 
 Se pueden registrar entregas por día, no es necesario registrar todas las entregas hasta el final del mes mes. El sistema es capaz de agrupar las entregas realizadas por el trabajador y entregar el resultado del pago al trabajador de cada mes
