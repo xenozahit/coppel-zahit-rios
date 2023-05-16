@@ -50,6 +50,16 @@ class MonthlyPayment
     #[ORM\JoinColumn(nullable: false)]
     private ?Employee $employee = null;
 
+    #[ORM\Column]
+    private ?float $totalPayment = null;
+
+    #[ORM\ManyToOne(inversedBy: 'monthlyPayments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $createdyBy = null;
+
+    #[ORM\Column]
+    private ?float $totalBeforeTaxes = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -195,6 +205,47 @@ class MonthlyPayment
     public function setEmployee(?Employee $employee): self
     {
         $this->employee = $employee;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getEmployee();
+    }
+
+    public function getTotalPayment(): ?float
+    {
+        return $this->totalPayment;
+    }
+
+    public function setTotalPayment(float $totalPayment): self
+    {
+        $this->totalPayment = $totalPayment;
+
+        return $this;
+    }
+
+    public function getCreatedyBy(): ?User
+    {
+        return $this->createdyBy;
+    }
+
+    public function setCreatedyBy(?User $createdyBy): self
+    {
+        $this->createdyBy = $createdyBy;
+
+        return $this;
+    }
+
+    public function getTotalBeforeTaxes(): ?float
+    {
+        return $this->totalBeforeTaxes;
+    }
+
+    public function setTotalBeforeTaxes(float $totalBeforeTaxes): self
+    {
+        $this->totalBeforeTaxes = $totalBeforeTaxes;
 
         return $this;
     }

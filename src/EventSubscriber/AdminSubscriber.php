@@ -10,7 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MonthlyPaymentRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class AdminSubscriber implements EventSubscriberInterface
 {
@@ -18,12 +20,14 @@ class AdminSubscriber implements EventSubscriberInterface
     private MonthlyPaymentRepository $monthlyPaymentRepository;
     private RecordRepository $recordRepository;
     private EntityManagerInterface $manager;
+    private TokenStorageInterface $tokenStorage;
 
-    public function __construct(MonthlyPaymentRepository $monthlyPaymentRepository, RecordRepository $recordRepository, EntityManagerInterface $manager)
+    public function __construct(MonthlyPaymentRepository $monthlyPaymentRepository, RecordRepository $recordRepository, EntityManagerInterface $manager, TokenStorageInterface $tokenStorage)
     {
         $this->monthlyPaymentRepository = $monthlyPaymentRepository;
         $this->recordRepository = $recordRepository;
         $this->manager = $manager;
+        $this->tokenStorage = $tokenStorage;
     }
 
     public static function getSubscribedEvents()
@@ -31,7 +35,16 @@ class AdminSubscriber implements EventSubscriberInterface
         return [
             BeforeEntityPersistedEvent::class => ['beforPersistEntity'],
             BeforeEntityUpdatedEvent::class => ['beforeUpdateEntity'],
+            AfterEntityPersistedEvent::class => ['afterEntityPersistedEvent'],
         ];
+    }
+
+    public function afterEntityPersistedEvent(AfterEntityPersistedEvent $event)
+    {
+        $entity = $event->getEntityInstance();
+
+        if ($entity instanceof Record)
+            $this->recordActions($entity);
     }
 
     public function beforeUpdateEntity(BeforeEntityUpdatedEvent $event)
@@ -40,10 +53,6 @@ class AdminSubscriber implements EventSubscriberInterface
 
         if ($entity instanceof Role)
             $this->roleActions($entity);
-
-        if ($entity instanceof Record)
-            $this->recordActions($entity);
-
     }
 
     public function beforPersistEntity(BeforeEntityPersistedEvent $event)
@@ -51,11 +60,7 @@ class AdminSubscriber implements EventSubscriberInterface
         $entity = $event->getEntityInstance();
 
         if ($entity instanceof Role)
-            $this->roleActions($entity);
-
-        if ($entity instanceof Record)
-            $this->recordActions($entity);
-
+            $this->roleActions($entity);   
     }
 
     public function roleActions(Role $role)
@@ -65,6 +70,7 @@ class AdminSubscriber implements EventSubscriberInterface
 
     public function recordActions(Record $record)
     {
-        MonthlyPaymentUpdate::calculatePayment($record, $this->monthlyPaymentRepository, $this->recordRepository, $this->manager);
+        MonthlyPaymentUpdate::calculatePayment($record, $this->monthlyPaymentRepository, $this->recordRepository, $this->manager, $this->tokenStorage);
     }
+    
 }

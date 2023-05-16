@@ -9,6 +9,7 @@ use App\Entity\MonthlyPayment;
 use App\Repository\RecordRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MonthlyPaymentRepository;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class MonthlyPaymentUpdate 
 {
@@ -18,7 +19,7 @@ class MonthlyPaymentUpdate
     const MONTHLY_SALARY_LIMIT = 10000;
     const FOOD_ALLOWANCE_PERCENTAGE = 4;
 
-    public static function calculatePayment(Record $record, MonthlyPaymentRepository $monthlyPaymentRepository, RecordRepository $recordRepository, EntityManagerInterface $manager)
+    public static function calculatePayment(Record $record, MonthlyPaymentRepository $monthlyPaymentRepository, RecordRepository $recordRepository, EntityManagerInterface $manager, TokenStorageInterface $tokenStorage)
     {        
         $role = $record->getEmployee()->getRole();
         $deliveryBondQuantity = 0;
@@ -47,11 +48,14 @@ class MonthlyPaymentUpdate
         
         $monthlySalary = $role->getMonthlyBaseSalary() + $deliveryBondMoney + $hourlyBondMoney; //calc of total monthly salary 
 
+        $foodAllowancePercentage = self::FOOD_ALLOWANCE_PERCENTAGE;
+        $foodAllowanceMoney = $monthlySalary * $foodAllowancePercentage / 100; //calc of food allowance money
+
         $isrTaxRetentionPercentage = $monthlySalary > self::MONTHLY_SALARY_LIMIT ? self::HIGHER_ISR_TAX : self::LOWER_ISR_TAX; //calc of isr tax retention percentage
         $isrTaxRetentionMoney = $monthlySalary * $isrTaxRetentionPercentage / 100; //calc of isr tax retention money
 
-        $foodAllowancePercentage = self::FOOD_ALLOWANCE_PERCENTAGE;
-        $foodAllowanceMoney = $monthlySalary * $foodAllowancePercentage / 100; //calc of food allowance money
+        $monthlySalaryBeforeTaxes = $monthlySalary;
+        $monthlySalary -= $isrTaxRetentionMoney;        
 
         $monthlyPayment = $monthlyPaymentRepository->findOneBy([
             'month' => $month,
@@ -71,7 +75,9 @@ class MonthlyPaymentUpdate
         $monthlyPayment->setFoodAllowancePercentage($foodAllowancePercentage);
         $monthlyPayment->setFoodAllowanceMoney($foodAllowanceMoney);
         $monthlyPayment->setEmployee($record->getEmployee());
-
+        $monthlyPayment->setTotalBeforeTaxes($monthlySalaryBeforeTaxes);
+        $monthlyPayment->setTotalPayment($monthlySalary);
+        $monthlyPayment->setCreatedyBy($tokenStorage->getToken()->getUser());
         $manager->persist($monthlyPayment);
         $manager->flush();
     }
