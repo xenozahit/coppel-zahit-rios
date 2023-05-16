@@ -2,7 +2,9 @@
 
 Prueba técnica para Coppel
 
-## Usuario de prueba
+## Entorno de ejecución
+
+http://3.14.19.2/
 
 user: test
 
@@ -11,12 +13,11 @@ password: test
 
 ## Mejoras al sistema
 
-Se pueden registrar entregas por día, no es necesario registrar todas las entregas del mes. El sistema es capaz de agrupar las entregas realizadas por el trabajador y entregar el resultado del pago al trabajador
+Se pueden registrar entregas por día, no es necesario registrar todas las entregas hasta el final del mes mes. El sistema es capaz de agrupar las entregas realizadas por el trabajador y entregar el resultado del pago al trabajador de cada mes
 
 ## Seeders o fixtures
 El sistema ya cuenta con ejemplos de usuarios y roles en el sistema que el usuario puede usar para registrar entregas y calcular los salarios mensuales
 
-Los fixtures son cargados en orden gracias a la interfaz DependentFixtureInterface
 
 ## Patrones de diseño utilizados
 
@@ -45,4 +46,13 @@ Los fixtures son cargados en orden gracias a la interfaz DependentFixtureInterfa
     - Tipo de autenticación
     - Password hasher
 
+## Sobre el servidor
+
+Configuré una instancia EC2 de AWS, con sitema operativo Ubuntu, NGINX, UFW (firewall)
+
+## ToDos
+
+- Implementación de pruebas unitarias
+
+- Configurar un flujo CI/CD
 
