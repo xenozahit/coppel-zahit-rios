@@ -52,6 +52,18 @@ class RecordRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function totalDeliveriesByDatesAndEmployee(DateTime $startDate, DateTime $endDate, Employee $employee){
+        return $this->createQueryBuilder('r')
+            ->select("sum(r.quantity) as totalDeliveries")
+            ->innerJoin('r.employee', 'e', 'WITH', 'e.id = :employee_id')
+            ->where('r.date BETWEEN :startDate AND :endDate')            
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->setParameter('employee_id', $employee->getId())
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 //    /**
 //     * @return Record[] Returns an array of Record objects
 //     */

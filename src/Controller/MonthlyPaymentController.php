@@ -36,7 +36,7 @@ class MonthlyPaymentController extends AbstractController
         $startDate = new DateTime($year.'-'.$month.'-01');
         $endDate = new DateTime( date("Y-m-t", strtotime($startDate->format('Y-m-01'))) );
 
-        $monthlyRecords = $this->recordRepository->findByDatesAndEmployee($startDate, $endDate, $employee);
+        $totalDeliveries = $this->recordRepository->totalDeliveriesByDatesAndEmployee($startDate, $endDate, $employee);
 
         $monthlyPayment = $this->monthlyPaymentRepository->findOneBy([
             'month' => $month,
@@ -47,9 +47,8 @@ class MonthlyPaymentController extends AbstractController
             $monthlyPayment = new MonthlyPayment;
             $monthlyPayment->setMonth($month)->setYear($year)->setEmployee($employee);
         }
-
-        $monthlyPayment->calculatePayment($monthlyRecords);
-        $monthlyPayment->setCreatedyBy($this->tokenStorageInterface->getToken()->getUser());
+        
+        $monthlyPayment->computeMonthlyPayment($totalDeliveries, $this->tokenStorageInterface);
         $this->entityManagerInterface->persist($monthlyPayment);
         $this->entityManagerInterface->flush();
         

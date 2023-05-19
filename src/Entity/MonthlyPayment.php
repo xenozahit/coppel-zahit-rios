@@ -2,15 +2,18 @@
 
 namespace App\Entity;
 
+use App\Entity\Role;
+use App\Strategy\IsrStrategy;
+use App\Strategy\isr9Strategy;
+use App\Strategy\isr12Strategy;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\MonthlyPaymentRepository;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 #[ORM\Entity(repositoryClass: MonthlyPaymentRepository::class)]
 class MonthlyPayment
 {
-    const BOND_PER_DELIVERY = 5;
-    const HIGHER_ISR_TAX = 12;
-    const LOWER_ISR_TAX = 9;
+    const BOND_PER_DELIVERY = 5;    
     const MONTHLY_SALARY_LIMIT = 10000;
     const FOOD_ALLOWANCE_PERCENTAGE = 4;
 
@@ -256,48 +259,49 @@ class MonthlyPayment
         return $this;
     }
 
-    public function calculatePayment(array $records)
-    {
-        $role = $this->getEmployee()->getRole();
-        $deliveryBondQuantity = 0;
-        $deliveryBondMoney = 0;
-        $hourlyBondQuanity = 0;
-        $hourlyBondMoney = 0;
-        $monthlySalary = 0;
-        $isrTaxRetentionPercentage = 0;
-        $isrTaxRetentionMoney = 0;
-        $foodAllowancePercentage = 0;
-        $foodAllowanceMoney = 0;   
-        
-        foreach($records as $monthlyRecord){ //calc of deliveries quantity
-            $deliveryBondQuantity += $monthlyRecord->getQuantity();
-        }
-        $deliveryBondMoney = self::BOND_PER_DELIVERY * $deliveryBondQuantity; //calc of deliveries bond in money
+    public function computeMonthlyPayment(int $totalDeliveries, TokenStorageInterface $tokenStorageInterface){
+        $this->calculateHourBond();
+        $this->calculateDeliveryBond($totalDeliveries);
+        $this->calculateMonthlySalaryBeforeTaxes();
+        $this->calculateFoodAllowance();
+        $this->setCreatedyBy($tokenStorageInterface->getToken()->getUser());
 
+        $isrStrategy = $this->getTotalBeforeTaxes() > self::MONTHLY_SALARY_LIMIT ? new isr12Strategy  : new isr9Strategy ;
+        $this->calculateIsr($isrStrategy);
+        $this->calculateTotalAfterTaxes();
+    }
+
+    public function calculateHourBond(){
+        $role = $this->getEmployee()->getRole();
+        
         $hourlyBondQuanity = $role->getHourlyBond() > 0 ? Role::WEEKS_PER_MONTH * $role->getWorkDayDuration() * $role->getWorkDaysPerWeek()  : 0; //calc of hours bond quantity
         $hourlyBondMoney = $hourlyBondQuanity > 0 ? $hourlyBondQuanity * $role->getHourlyBond() : 0; //calc of hours bond money
-
-        $monthlySalary = $role->getMonthlyBaseSalary() + $deliveryBondMoney + $hourlyBondMoney; //calc of total monthly salary
         
-        $foodAllowancePercentage = self::FOOD_ALLOWANCE_PERCENTAGE;
-        $foodAllowanceMoney = $monthlySalary * $foodAllowancePercentage / 100; //calc of food allowance money
+        $this->setHourlyBondQuanity($hourlyBondQuanity)->setHourlyBondMoney($hourlyBondMoney);
+    }
 
-        $isrTaxRetentionPercentage = $monthlySalary > self::MONTHLY_SALARY_LIMIT ? self::HIGHER_ISR_TAX : self::LOWER_ISR_TAX; //calc of isr tax retention percentage
-        $isrTaxRetentionMoney = $monthlySalary * $isrTaxRetentionPercentage / 100; //calc of isr tax retention money
+    public function calculateDeliveryBond($totalDeliveries){
+        $deliveryBondMoney = self::BOND_PER_DELIVERY * $totalDeliveries; //calc of deliveries bond in money
+        $this->setDeliveryBondQuantity($totalDeliveries)->setDeliveryBondMoney($deliveryBondMoney);
+    }
 
-        $monthlySalaryBeforeTaxes = $monthlySalary;
-        $monthlySalary -= $isrTaxRetentionMoney;
+    public function calculateFoodAllowance(){        
+        $foodAllowanceMoney = $this->getTotalBeforeTaxes() * self::FOOD_ALLOWANCE_PERCENTAGE / 100; //calc of food allowance money
+        $this->setFoodAllowancePercentage(self::FOOD_ALLOWANCE_PERCENTAGE)->setFoodAllowanceMoney($foodAllowanceMoney);
+    }
 
-        $this->setBaseSalary($role->getMonthlyBaseSalary())
-            ->setHourlyBondQuanity($hourlyBondQuanity)
-            ->setHourlyBondMoney($hourlyBondMoney)
-            ->setDeliveryBondQuantity($deliveryBondQuantity)
-            ->setDeliveryBondMoney($deliveryBondMoney)
-            ->setIsrTaxRetentionPercentage($isrTaxRetentionPercentage)
-            ->setIsrTaxRetentionMoney($isrTaxRetentionMoney)
-            ->setFoodAllowancePercentage($foodAllowancePercentage)
-            ->setFoodAllowanceMoney($foodAllowanceMoney)
-            ->setTotalBeforeTaxes($monthlySalaryBeforeTaxes)
-            ->setTotalPayment($monthlySalary);        
+    public function calculateMonthlySalaryBeforeTaxes(){
+        $role = $this->getEmployee()->getRole();
+        $monthlySalaryBeforeTaxes = $role->getMonthlyBaseSalary() + $this->getDeliveryBondMoney() + $this->getHourlyBondMoney(); //calc of total monthly salary
+        $this->setTotalBeforeTaxes($monthlySalaryBeforeTaxes);
+    }   
+
+    function calculateIsr(IsrStrategy $strategy)
+    {
+       $strategy->calculateIsr($this);
+    }
+
+    public function calculateTotalAfterTaxes(){
+        $this->setTotalPayment($this->getTotalBeforeTaxes() - $this->getIsrTaxRetentionMoney() );
     }
 }
