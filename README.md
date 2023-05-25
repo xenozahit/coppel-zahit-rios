@@ -2,15 +2,6 @@
 
 Prueba técnica para Coppel
 
-## Entorno de ejecución
-
-http://3.14.19.2/
-
-user: test
-
-password: test
-
-
 ## Diagrama entidad relación
 
 https://whimsical.com/coppel-VM86nAa74oehXWMqrLLZUU
